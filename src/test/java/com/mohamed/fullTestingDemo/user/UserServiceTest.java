@@ -3,7 +3,7 @@ package com.mohamed.fullTestingDemo.user;
 import com.mohamed.fullTestingDemo.user.dto.request.CreateUserRequestDto;
 import com.mohamed.fullTestingDemo.user.dto.response.CreateUserResponseDto;
 import com.mohamed.fullTestingDemo.user.exceptions.UserAlreadyExistsException;
-import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class) // ✅ No @SpringBootTest for unit tests
-class UserServiceTest {
+class UserServiceTest { // ? TDD => Red, Green, Refactor
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -67,14 +68,21 @@ class UserServiceTest {
     @Test
     void testCreateUser_shouldThrowExceptionWhenUsernameIsBlank() {
         // Given
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
         CreateUserRequestDto requestDto = new CreateUserRequestDto("", "john@example.com");
 
         // When & Then
-        assertThrows(ConstraintViolationException.class, () -> userService.createUser(requestDto));
+        Set<ConstraintViolation<CreateUserRequestDto>> violations = validator.validate(requestDto);
+
+        assertThat(violations).isNotEmpty();
+        assertThat(violations.iterator().next().getMessage()).isEqualTo("must not be blank");
     }
 
+
     @Test
-    void shouldThrowExceptionWhenUserAlreadyExists() {
+    void testCreateUser_shouldThrowExceptionWhenUserAlreadyExists() {
         // Given
         CreateUserRequestDto requestDto = new CreateUserRequestDto("mohamed_medhat", "mmr973320@example.com");
         User existingUser = new User();
