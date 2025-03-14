@@ -1,9 +1,6 @@
 package com.mohamed.fullTestingDemo.user.dto.response;
 
-import lombok.Builder;
-
-@Builder
-public record CreateUserResponseDto(
+public record GetAllUsersResponseDto(
         Long id,
         String username,
         String email

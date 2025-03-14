@@ -1,4 +1,4 @@
-package com.mohamed.fullTestingDemo;
+package com.mohamed.fullTestingDemo.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
