@@ -1,5 +1,6 @@
 package com.mohamed.fullTestingDemo;
 
+import com.mohamed.fullTestingDemo.configuration.TestcontainersConfiguration;
 import org.springframework.boot.SpringApplication;
 
 public class TestFullTestingDemoApplication {
