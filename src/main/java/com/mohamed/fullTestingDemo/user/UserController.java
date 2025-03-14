@@ -2,8 +2,9 @@ package com.mohamed.fullTestingDemo.user;
 
 
 import com.mohamed.fullTestingDemo.user.dto.request.CreateUserRequestDto;
+import com.mohamed.fullTestingDemo.user.dto.request.UpdateUserRequestDto;
 import com.mohamed.fullTestingDemo.user.dto.response.CreateUserResponseDto;
-import com.mohamed.fullTestingDemo.user.dto.response.GetAllUsersResponseDto;
+import com.mohamed.fullTestingDemo.user.dto.response.GetUsersResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,11 +27,32 @@ public class UserController {
     }
 
     @GetMapping
-    public CompletableFuture<ResponseEntity<List<GetAllUsersResponseDto>>> getAllUsers(
+    public CompletableFuture<ResponseEntity<List<GetUsersResponseDto>>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         return userService.getAllUsers(page, size)
                 .thenApply(users -> ResponseEntity.ok().body(users));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GetUsersResponseDto> getUserById(@PathVariable("id") Long id) {
+        GetUsersResponseDto response = this.userService.getUserById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<GetUsersResponseDto> updateUser(
+            @PathVariable("id") Long id,
+            @RequestBody @Valid UpdateUserRequestDto data
+    ) {
+        GetUsersResponseDto response = this.userService.updateUser(id, data);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
+        this.userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

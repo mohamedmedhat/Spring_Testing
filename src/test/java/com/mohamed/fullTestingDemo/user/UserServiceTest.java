@@ -1,15 +1,17 @@
 package com.mohamed.fullTestingDemo.user;
 
 import com.mohamed.fullTestingDemo.user.dto.request.CreateUserRequestDto;
+import com.mohamed.fullTestingDemo.user.dto.request.UpdateUserRequestDto;
 import com.mohamed.fullTestingDemo.user.dto.response.CreateUserResponseDto;
-import com.mohamed.fullTestingDemo.user.dto.response.GetAllUsersResponseDto;
+import com.mohamed.fullTestingDemo.user.dto.response.GetUsersResponseDto;
 import com.mohamed.fullTestingDemo.user.exceptions.UserAlreadyExistsException;
+import com.mohamed.fullTestingDemo.user.exceptions.UserNotFoundException;
 import jakarta.validation.*;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -124,14 +127,14 @@ class UserServiceTest { // ? TDD => Red, Green, Refactor
 
         given(userRepository.findAll(pageable)).willReturn(userPage);
 
-        GetAllUsersResponseDto dto1 = new GetAllUsersResponseDto(1L, "user1", "user1@gmail.com");
-        GetAllUsersResponseDto dto2 = new GetAllUsersResponseDto(2L, "user2", "user2@gmail.com");
+        GetUsersResponseDto dto1 = new GetUsersResponseDto(1L, "user1", "user1@gmail.com");
+        GetUsersResponseDto dto2 = new GetUsersResponseDto(2L, "user2", "user2@gmail.com");
 
         given(userMapper.toGetAllDto(users)).willReturn(List.of(dto1, dto2));
 
         // When (Act)
-        CompletableFuture<List<GetAllUsersResponseDto>> futureResult = userService.getAllUsers(page, size);
-        List<GetAllUsersResponseDto> result = futureResult.join();
+        CompletableFuture<List<GetUsersResponseDto>> futureResult = userService.getAllUsers(page, size);
+        List<GetUsersResponseDto> result = futureResult.join();
 
         // Then (Assert)
         assertThat(result).isNotNull();
@@ -141,4 +144,89 @@ class UserServiceTest { // ? TDD => Red, Green, Refactor
 
         verify(userRepository, times(1)).findAll(pageable);
         verify(userMapper, times(1)).toGetAllDto(users);    }
+
+
+    @Test
+    void testGetUserById_shouldReturnExistUser(){
+        // Given (Arrange)
+        User user = User.builder().id(1L).username("mo").email("momo@gmail.com").createdAt(LocalDateTime.now()).build();
+        GetUsersResponseDto responseDto = new GetUsersResponseDto(1L, "mo", "momo@gmail.com");
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(userMapper.toGetDto(user)).willReturn(responseDto);
+        // When (Act)
+        GetUsersResponseDto existUser = this.userService.getUserById(1L);
+
+        // Then (Assert)
+        assertThat(existUser).isNotNull();
+        assertThat(existUser.email()).isEqualTo("momo@gmail.com");
+    }
+
+    @Test
+    void testGetUserById_shouldThrowException_WhenUserNotFound() {
+        // Given: UserRepository returns empty result
+        given(userRepository.findById(1L)).willReturn(Optional.empty());
+
+        // When & Then: Expect exception when calling the method
+        assertThatThrownBy(() -> userService.getUserById(1L))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("user with id: 1 not found");
+    }
+
+    @Test
+    void testUpdateUser_shouldUpdateUserAndReturnGetUsersResponseDto() {
+        // Given (Arrange)
+        User existingUser = User.builder()
+                .id(1L)
+                .username("mo")
+                .email("momo@gmail.com")
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        UpdateUserRequestDto requestDto = new UpdateUserRequestDto("omar", "om@gmail.com");
+
+        User updatedUser = User.builder()
+                .id(1L)
+                .username("omar")
+                .email("om@gmail.com")
+                .createdAt(existingUser.getCreatedAt())
+                .build();
+
+        GetUsersResponseDto responseDto = new GetUsersResponseDto(1L, "omar", "om@gmail.com");
+
+        // Mock behavior
+        given(userRepository.findById(1L)).willReturn(Optional.of(existingUser));
+        given(userMapper.toUpdateEntity(existingUser, requestDto)).willReturn(updatedUser);
+        given(userRepository.save(updatedUser)).willReturn(updatedUser);
+        given(userMapper.toGetDto(updatedUser)).willReturn(responseDto);
+
+        // When (Act)
+        GetUsersResponseDto result = userService.updateUser(1L, requestDto);
+
+        // Then (Assert)
+        assertThat(result).isNotNull();
+        assertThat(result.id()).isEqualTo(1L);
+        assertThat(result.username()).isEqualTo("omar");
+        assertThat(result.email()).isEqualTo("om@gmail.com");
+    }
+
+    @Test
+    void testDeleteUser_shouldDeleteUser() {
+        // Given (Arrange)
+        User user = User.builder()
+                .id(1L)
+                .username("mo")
+                .email("momo@gmail.com")
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        // When (Act)
+        userService.deleteUser(1L);
+
+        // Then (Assert)
+        verify(userRepository, times(1)).delete(user);
+    }
+
 }

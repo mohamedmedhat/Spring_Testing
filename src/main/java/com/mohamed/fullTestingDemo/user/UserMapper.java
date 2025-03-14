@@ -1,8 +1,9 @@
 package com.mohamed.fullTestingDemo.user;
 
 import com.mohamed.fullTestingDemo.user.dto.request.CreateUserRequestDto;
+import com.mohamed.fullTestingDemo.user.dto.request.UpdateUserRequestDto;
 import com.mohamed.fullTestingDemo.user.dto.response.CreateUserResponseDto;
-import com.mohamed.fullTestingDemo.user.dto.response.GetAllUsersResponseDto;
+import com.mohamed.fullTestingDemo.user.dto.response.GetUsersResponseDto;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,15 +26,29 @@ public class UserMapper {
         );
     }
 
-    public List<GetAllUsersResponseDto> toGetAllDto(List<User> users) {
+    public List<GetUsersResponseDto> toGetAllDto(List<User> users) {
         return users.stream()
                 .map(user ->
-                        new GetAllUsersResponseDto(
+                        new GetUsersResponseDto(
                                 user.getId(),
                                 user.getUsername(),
                                 user.getEmail()
                         )
                 )
                 .collect(Collectors.toList());
+    }
+
+    public GetUsersResponseDto toGetDto(User user) {
+        return new GetUsersResponseDto(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail()
+        );
+    }
+
+    public User toUpdateEntity(User user, UpdateUserRequestDto data) {
+        user.setEmail(data.email());
+        user.setUsername(data.username());
+        return user;
     }
 }

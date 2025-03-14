@@ -3,7 +3,7 @@ package com.mohamed.fullTestingDemo.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mohamed.fullTestingDemo.user.dto.request.CreateUserRequestDto;
 import com.mohamed.fullTestingDemo.user.dto.response.CreateUserResponseDto;
-import com.mohamed.fullTestingDemo.user.dto.response.GetAllUsersResponseDto;
+import com.mohamed.fullTestingDemo.user.dto.response.GetUsersResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +37,15 @@ class UserControllerTest {
 
     private CreateUserRequestDto requestDto;
     private CreateUserResponseDto responseDto;
-    private List<GetAllUsersResponseDto> usersList;
+    private List<GetUsersResponseDto> usersList;
 
     @BeforeEach
     public void setUp(){
         requestDto = CreateUserRequestDto.builder().username("mohamed_medhat").email("mmr973320@example.com").build();
         responseDto = CreateUserResponseDto.builder().id(1L).username("mohamed_medhat").email("mmr973320@example.com").build();
         usersList = List.of(
-                new GetAllUsersResponseDto(1L, "user1", "user1@example.com"),
-                new GetAllUsersResponseDto(2L, "user2", "user2@example.com")
+                new GetUsersResponseDto(1L, "user1", "user1@example.com"),
+                new GetUsersResponseDto(2L, "user2", "user2@example.com")
         );
     }
 
@@ -67,9 +67,9 @@ class UserControllerTest {
     @Test
     void testGetAllUsers_ShouldReturn200AndListOfUsers() throws Exception {
         // Given: Mock user list
-        List<GetAllUsersResponseDto> usersList = List.of(
-                new GetAllUsersResponseDto(1L, "user1", "user1@example.com"),
-                new GetAllUsersResponseDto(2L, "user2", "user2@example.com")
+        List<GetUsersResponseDto> usersList = List.of(
+                new GetUsersResponseDto(1L, "user1", "user1@example.com"),
+                new GetUsersResponseDto(2L, "user2", "user2@example.com")
         );
 
         // Mock service to return CompletableFuture<List<GetAllUsersResponseDto>>
