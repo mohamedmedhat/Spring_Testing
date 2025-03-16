@@ -1,0 +1,16 @@
+server:
+  port: 9090
+  http2:
+    enabled: true
+
+spring:
+  datasource:
+    url: jdbc:postgresql://prod-db-server:5432/prod_db
+    username: prod_user
+    password: prod_secret
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true

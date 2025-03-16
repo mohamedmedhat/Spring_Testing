@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: fullTestingDemo
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  profiles:
+    active: dev
+
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoint:
+    prometheus:
+      enabled: true
